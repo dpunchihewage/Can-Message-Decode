@@ -1,7 +1,11 @@
-This code defines a Python function called "decode_data_field()" that can decode a given PGN and its corresponding data field (in hexadecimal format) using information stored in an Excel file. The decoded information is then printed as a table and written to a new Excel workbook.
+The code starts by importing the necessary libraries, including pandas for reading Excel files, tabulate for formatting tables, datetime for generating timestamps, and openpyxl for writing Excel workbooks.
 
-The function prompts the user to input the PGN and data field in hexadecimal format. It then removes any spaces from the data field string and converts it from hexadecimal to a binary string. The function retrieves the rows in the Excel file that correspond to the given PGN and extracts the SPN (Suspect Parameter Number), parameter name, byte start, bit start, number of bits, and status for each SPN.
+The function decode_data_field() is then defined. It prompts the user to input a PGN and data field in hexadecimal format. The input data field is cleaned up by removing any spaces, and then converted from hexadecimal to a binary string.
 
-The function then decodes each SPN using the binary data field, and stores the decoded SPNs, parameter names, statuses, and binary representations in a list. The decoded information is printed using the "tabulate" package as a table, and a new Excel workbook is created with the decoded SPNs written to it. The file name of the Excel workbook is created based on the input PGN, data field, and current timestamp.
+The function then retrieves the rows in the Excel file that correspond to the given PGN and extracts the relevant information for each SPN, including its number, parameter name, byte start, bit start, number of bits, and status values for different conditions.
 
-Finally, the function is called repeatedly in a while loop until the program is closed
+Next, the function decodes each SPN using the binary data field and stores the decoded information, including the SPN number, parameter name, status, and binary representation, in a list. The decoded information is then printed as a table using the tabulate package.
+
+Finally, a new Excel workbook is created with the decoded information written to it. The file name of the Excel workbook is based on the input PGN, data field, and current timestamp. The function then loops repeatedly using a while loop until the program is closed.
+
+Overall, this code provides a useful tool for decoding PGNs and their data fields using information stored in an Excel file, and saves the decoded information to a new Excel workbook for later use.
