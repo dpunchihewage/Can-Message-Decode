@@ -1,0 +1,66 @@
+import pandas as pd
+from tabulate import tabulate
+from datetime import datetime
+from openpyxl import Workbook
+
+# Read the PGN Information excel file
+file_path = r'C:\xxxxxxxxx\xxxxxxxxxxx\xxxxxxxxxxxxx\xxxxxxxxxx\PGN Information.xlsx'
+sheet_name = 'CAN J1939 Diagnostic Info'
+pgn_info = pd.read_excel(file_path, sheet_name=sheet_name)
+
+def decode_data_field():
+    # Get user inputs
+    pgn = input('Enter the PGN in hex format: ')
+    data_field = input('Enter the data field in hex format: ')
+
+    # Remove spaces from the input data field string
+    data_field = data_field.replace(' ', '')
+
+    # Convert data field from hex to binary string
+    data_bin = bin(int(data_field, 16))[2:].zfill(64)
+
+    # Get SPN rows for the given PGN
+    pgn_row = pgn_info.loc[pgn_info['PGN Number'] == int(pgn, 16)]
+    spn_rows = pgn_row[['SPN Number', 'Parameter Name', 'Byte Start', 'Bit Start', 'Number of Bits', 'Status 00', 'Status 01', 'Status 10', 'Status 11']]
+
+    # Decode SPNs from data field
+    decoded_spns = []
+    for index, spn_row in spn_rows.iterrows():
+        start_byte = spn_row['Byte Start']
+        start_bit = spn_row['Bit Start']
+        num_bits = spn_row['Number of Bits']
+        spn_data_bin = data_bin[(start_byte * 8 + start_bit):(start_byte * 8 + start_bit + num_bits)]
+        spn_data_int = int(spn_data_bin, 2)
+        status_00 = spn_row['Status 00']
+        status_01 = spn_row['Status 01']
+        status_10 = spn_row['Status 10']
+        status_11 = spn_row['Status 11']
+        status = None
+        if spn_data_int == 0:
+            status = status_00
+        elif spn_data_int == 1:
+            status = status_01
+        elif spn_data_int == 2:
+            status = status_10
+        elif spn_data_int == 3:
+            status = status_11
+        binary = bin(spn_data_int)[2:].zfill(num_bits)
+        decoded_spns.append([spn_row['SPN Number'], spn_row['Parameter Name'], status, binary])
+
+    # Print decoded SPNs as a table
+    headers = ['SPN Number', 'Parameter Name', 'Status', 'Binary']
+    print(tabulate(decoded_spns, headers=headers))
+
+    # Create a new Excel workbook and write the decoded SPNs to it
+    now = datetime.now().strftime('%Y%m%d_%H%M%S')
+    file_name = f"{pgn}_{data_field}_{now}.xlsx"
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Decoded SPNs"
+    for row in decoded_spns:
+        ws.append(row)
+    wb.save(f'C:\\xxxxxxxxxx\\xxxxxxxxxx\\xxxxxxxxx\\xxxxxxxxxxx\\{file_name}')
+
+# Call the decode_data_field function repeatedly until the program is closed
+while True:
+    decode_data_field()
